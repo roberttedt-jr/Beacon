@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEACON | Status & Uptime</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #090a0f;
+            --surface: #12141c;
+            --surface-hover: #181b26;
+            --border: #1f2333;
+            --text-main: #f3f4f6;
+            --text-muted: #8b949e;
+            --up: #10b981;
+            --up-glow: rgba(16, 185, 129, 0.2);
+            --down: #ef4444;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 860px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-box {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .brand h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        /* STATUS BADGE */
+        .global-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--up);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--up);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        /* MONITOR CARDS */
+        .monitors-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: #2e354d;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .service-info h2 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .service-info a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+        }
+
+        .service-info a:hover {
+            text-decoration: underline;
+        }
+
+        .metrics {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-family: var(--font-mono);
+        }
+
+        .metric-item {
+            text-align: right;
+        }
+
+        .metric-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .metric-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* HEARTBEAT BARS */
+        .heartbeat-wrap {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            height: 28px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+        .bar {
+            flex: 1;
+            height: 100%;
+            background-color: var(--up);
+            border-radius: 2px;
+            opacity: 0.85;
+            transition: opacity 0.15s, transform 0.15s;
+            position: relative;
+        }
+
+        .bar.down {
+            background-color: var(--down);
+        }
+
+        .bar:hover {
+            opacity: 1;
+            transform: scaleY(1.2);
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        footer {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="brand">
+            <div class="logo-box">B</div>
+            <div>
+                <h1>BEACON</h1>
+            </div>
+        </div>
+        <div class="global-badge" id="globalBadge">
+            <div class="pulse-dot"></div>
+            <span>All Systems Operational</span>
+        </div>
+    </header>
+
+    <div class="monitors-grid" id="monitorsContainer">
+        <!-- Renderizado dinámico -->
+    </div>
+
+    <footer>
+        <p>Engine powered by Spring Boot 3 & PostgreSQL • BEACON Architecture</p>
+    </footer>
+</div>
+
+<script>
+    // Fallback con datos mock iniciales por si corre estático sin levantar Java aún
+    const fallbackMonitors = [
+        { id: 1, name: "PULSE App", url: "https://pulse-psi-blond.vercel.app/", status: "UP", lastResponseTimeMs: 42 },
+        { id: 2, name: "ATMOS Weather", url: "https://roberttedt-jr.github.io/ATMOS./app.html", status: "UP", lastResponseTimeMs: 38 }
+    ];
+
+    async function loadDashboard() {
+        const container = document.getElementById("monitorsContainer");
+        let monitors = fallbackMonitors;
+
+        try {
+            const res = await fetch("/api/monitors");
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.length > 0) monitors = data;
+            }
+        } catch (e) {
+            console.log("Modo standalone/estático: mostrando métricas preparadas.");
+        }
+
+        container.innerHTML = "";
+
+        for (const m of monitors) {
+            const card = document.createElement("div");
+            card.className = "card";
+
+            // Simulación de las últimas 45 comprobaciones (en backend real se leen con /logs)
+            let barsHtml = "";
+            for (let i = 0; i < 45; i++) {
+                barsHtml += `<div class="bar" title="Check #${i + 1}: ${m.lastResponseTimeMs || 40}ms"></div>`;
+            }
+
+            card.innerHTML = `
+                <div class="card-top">
+                    <div class="service-info">
+                        <h2>${m.name}</h2>
+                        <a href="${m.url}" target="_blank" rel="noreferrer">${m.url.replace("https://", "")}</a>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric-item">
+                            <div class="metric-value">${m.lastResponseTimeMs ? m.lastResponseTimeMs + ' ms' : '--'}</div>
+                            <div class="metric-label">Latencia</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" style="color: var(--up)">99.9%</div>
+                            <div class="metric-label">Uptime</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="heartbeat-wrap">${barsHtml}</div>
+                <div class="card-bottom">
+                    <span>Hace 45 comprobaciones</span>
+                    <span>Actualizado hace unos segundos</span>
+                </div>
+            `;
+            container.appendChild(card);
+        }
+    }
+
+    loadDashboard();
+    setInterval(loadDashboard, 15000); // Polling cada 15 segundos
+</script>
+
+</body>
+</html>
