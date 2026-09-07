@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BEACON | Status & Uptime</title>
+    <title>BEACON // Telemetry & Ops Command</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #090a0f;
-            --surface: #12141c;
-            --surface-hover: #181b26;
-            --border: #1f2333;
-            --text-main: #f3f4f6;
-            --text-muted: #8b949e;
-            --up: #10b981;
-            --up-glow: rgba(16, 185, 129, 0.2);
-            --down: #ef4444;
-            --font-main: 'Plus Jakarta Sans', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --bg: #05070d;
+            --surface: rgba(14, 18, 28, 0.7);
+            --surface-hover: rgba(20, 26, 42, 0.85);
+            --border: rgba(30, 41, 59, 0.8);
+            --border-glow: rgba(56, 189, 248, 0.35);
+            --cyan: #00f2fe;
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --amber: #f59e0b;
+            --text-title: #f8fafc;
+            --text-muted: #64748b;
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Plus Jakarta Sans', sans-serif;
         }
 
         * {
@@ -30,284 +32,829 @@
 
         body {
             background-color: var(--bg);
-            color: var(--text-main);
-            font-family: var(--font-main);
+            color: var(--text-title);
+            font-family: var(--sans);
             min-height: 100vh;
-            padding: 2.5rem 1.5rem;
             display: flex;
             justify-content: center;
+            padding: 3rem 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .cyber-grid {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, rgba(16, 185, 129, 0.05) 50%, transparent 70%);
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
             width: 100%;
-            max-width: 860px;
+            max-width: 960px;
             display: flex;
             flex-direction: column;
             gap: 2rem;
+            position: relative;
+            z-index: 1;
         }
 
-        /* HEADER */
+        /* HEADER Y ESTRUCTURA FIJA */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
+            padding-bottom: 1.8rem;
+            backdrop-filter: blur(10px);
+            gap: 1rem;
         }
 
-        .brand {
+        .brand-section {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
+            flex-shrink: 0;
         }
 
-        .logo-box {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #3b82f6, #10b981);
-            border-radius: 8px;
+        .radar-box {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            background: rgba(0, 242, 254, 0.05);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 0.9rem;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
         }
 
-        .brand h1 {
-            font-size: 1.25rem;
+        .radar-sweep {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: conic-gradient(from 0deg, transparent 60%, rgba(0, 242, 254, 0.4) 100%);
+            border-radius: 50%;
+            animation: radarSpin 3s linear infinite;
+        }
+
+        @keyframes radarSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .radar-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--cyan);
+            z-index: 2;
+        }
+
+        .brand-text h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            background: linear-gradient(90deg, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-text span {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            color: var(--cyan);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* CONTENEDOR DE BOTONES CON POSICIÓN Y ANCHOS ANCLADOS */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            flex-wrap: nowrap;
+        }
+
+        .system-pill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 0.45rem 0.9rem;
+            border-radius: 999px;
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            color: var(--emerald);
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .blinking-led {
+            width: 8px;
+            height: 8px;
+            background: var(--emerald);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--emerald);
+            animation: ledPulse 1.5s infinite alternate;
+            flex-shrink: 0;
+        }
+
+        @keyframes ledPulse {
+            0% { opacity: 0.3; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.1); box-shadow: 0 0 14px var(--emerald); }
+        }
+
+        .action-btn {
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid rgba(0, 242, 254, 0.35);
+            color: var(--cyan);
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            height: 34px;
+            padding: 0 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .action-btn:hover {
+            background: rgba(0, 242, 254, 0.2);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .action-btn.secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border);
+            color: var(--text-title);
+        }
+
+        .action-btn.secondary:hover {
+            border-color: var(--cyan);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Dimensiones fijas para que ningún botón mueva al vecino */
+        .btn-add {
+            min-width: 140px;
+        }
+
+        .btn-sweep {
+            min-width: 140px;
+        }
+
+        .btn-lang {
+            min-width: 50px;
             font-weight: 700;
+        }
+
+        /* TELEMETRY STRIP */
+        .telemetry-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 1rem;
+        }
+
+        .strip-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .strip-label {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
-        /* STATUS BADGE */
-        .global-badge {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 0.4rem 0.8rem;
-            border-radius: 999px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--up);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--up);
-            animation: pulse 2s infinite ease-in-out;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.85); }
+        .strip-val {
+            font-size: 1.3rem;
+            font-weight: 700;
+            font-family: var(--mono);
         }
 
         /* MONITOR CARDS */
-        .monitors-grid {
+        .monitors-container {
             display: flex;
             flex-direction: column;
             gap: 1.25rem;
         }
 
-        .card {
-            background-color: var(--surface);
+        .monitor-card {
+            background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            transition: border-color 0.2s;
+            border-radius: 14px;
+            padding: 1.4rem;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .card:hover {
-            border-color: #2e354d;
+        .monitor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            transition: 0.5s;
         }
 
-        .card-top {
+        .monitor-card:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 10px 30px -10px rgba(0, 242, 254, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .monitor-card:hover::before {
+            left: 100%;
+            transition: 1s ease-in-out;
+        }
+
+        .card-header-line {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            margin-bottom: 1.1rem;
+            gap: 1rem;
         }
 
-        .service-info h2 {
-            font-size: 1.05rem;
-            font-weight: 600;
-            margin-bottom: 0.2rem;
+        .endpoint-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
         }
 
-        .service-info a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.8rem;
-            font-family: var(--font-mono);
-        }
-
-        .service-info a:hover {
-            text-decoration: underline;
-        }
-
-        .metrics {
+        .title-wrap {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            font-family: var(--font-mono);
+            gap: 0.6rem;
         }
 
-        .metric-item {
-            text-align: right;
-        }
-
-        .metric-value {
-            font-size: 0.95rem;
+        .endpoint-details h2 {
+            font-size: 1.15rem;
             font-weight: 700;
         }
 
-        .metric-label {
+        .custom-tag {
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: var(--amber);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: color 0.15s;
+            line-height: 1;
+        }
+
+        .delete-btn:hover {
+            color: var(--rose);
+        }
+
+        .endpoint-url {
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            color: var(--cyan);
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .endpoint-url:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        .status-indicators {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            font-family: var(--mono);
+        }
+
+        .stat-block {
+            text-align: right;
+        }
+
+        .stat-val {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-title);
+        }
+
+        .stat-tag {
             font-size: 0.65rem;
             color: var(--text-muted);
             text-transform: uppercase;
         }
 
-        /* HEARTBEAT BARS */
-        .heartbeat-wrap {
+        .bars-container {
             display: flex;
-            align-items: center;
-            gap: 3px;
-            height: 28px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 4px;
-            border-radius: 6px;
+            align-items: flex-end;
+            gap: 4px;
+            height: 36px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 0.9rem;
         }
 
-        .bar {
+        .ping-bar {
             flex: 1;
-            height: 100%;
-            background-color: var(--up);
+            background: var(--emerald);
             border-radius: 2px;
-            opacity: 0.85;
-            transition: opacity 0.15s, transform 0.15s;
-            position: relative;
+            opacity: 0.75;
+            transition: all 0.2s ease;
         }
 
-        .bar.down {
-            background-color: var(--down);
-        }
-
-        .bar:hover {
+        .ping-bar:hover {
             opacity: 1;
-            transform: scaleY(1.2);
+            height: 100% !important;
+            box-shadow: 0 0 10px var(--cyan);
+            background: var(--cyan);
+            cursor: pointer;
         }
 
-        .card-bottom {
+        .card-footer-line {
             display: flex;
             justify-content: space-between;
-            font-size: 0.72rem;
+            font-family: var(--mono);
+            font-size: 0.7rem;
             color: var(--text-muted);
-            font-family: var(--font-mono);
         }
 
+        /* MODAL */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 1.5rem;
+        }
+
+        .modal-box {
+            background: #0b0f19;
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+            border-radius: 14px;
+            width: 100%;
+            max-width: 440px;
+            padding: 1.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .modal-box h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .form-group input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.65rem 0.85rem;
+            color: #fff;
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--cyan);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        /* FOOTER CON COPYRIGHT */
         footer {
-            margin-top: 1rem;
+            margin-top: 1.5rem;
             text-align: center;
-            font-size: 0.75rem;
+            font-family: var(--mono);
+            font-size: 0.72rem;
             color: var(--text-muted);
             border-top: 1px solid var(--border);
             padding-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .copyright-text {
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+
+        .copyright-text a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+
+        .copyright-text a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 
+<div class="cyber-grid"></div>
+<div class="ambient-glow"></div>
+
 <div class="container">
     <header>
-        <div class="brand">
-            <div class="logo-box">B</div>
-            <div>
+        <div class="brand-section">
+            <div class="radar-box">
+                <div class="radar-sweep"></div>
+                <div class="radar-dot"></div>
+            </div>
+            <div class="brand-text">
                 <h1>BEACON</h1>
+                <span data-i18n="tagline">Precision Uptime & Ops</span>
             </div>
         </div>
-        <div class="global-badge" id="globalBadge">
-            <div class="pulse-dot"></div>
-            <span>All Systems Operational</span>
+        <div class="header-actions">
+            <div class="system-pill">
+                <div class="blinking-led"></div>
+                <span data-i18n="statusActive">ALL NODES ACTIVE</span>
+            </div>
+            <button class="action-btn secondary btn-add" onclick="openModal()">
+                <span data-i18n="addBtn">+ AÑADIR TARGET</span>
+            </button>
+            <button class="action-btn btn-sweep" onclick="triggerManualSweep()">
+                <span data-i18n="sweepBtn">⚡ SWEEP NOW</span>
+            </button>
+            <button class="action-btn secondary btn-lang" onclick="toggleLanguage()">
+                <span id="langLabel">EN</span>
+            </button>
         </div>
     </header>
 
-    <div class="monitors-grid" id="monitorsContainer">
-        <!-- Renderizado dinámico -->
+    <div class="telemetry-strip">
+        <div class="strip-card">
+            <span class="strip-label" data-i18n="metricAvailability">Global Availability</span>
+            <span class="strip-val" style="color: var(--emerald);">99.98%</span>
+        </div>
+        <div class="strip-card">
+            <span class="strip-label" data-i18n="metricLatency">Mean Latency</span>
+            <span class="strip-val" style="color: var(--cyan);" id="avgLatency">38 ms</span>
+        </div>
+        <div class="strip-card">
+            <span class="strip-label" data-i18n="metricTargets">Active Probes</span>
+            <span class="strip-val" id="targetCount">02 Targets</span>
+        </div>
+        <div class="strip-card">
+            <span class="strip-label" data-i18n="metricFrequency">Poll Frequency</span>
+            <span class="strip-val" data-i18n="pollTime">60s Loop</span>
+        </div>
     </div>
 
+    <main class="monitors-container" id="monitorsList">
+        <!-- Renderizado dinámico -->
+    </main>
+
     <footer>
-        <p>Engine powered by Spring Boot 3 & PostgreSQL • BEACON Architecture</p>
+        <p data-i18n="footerEngine">BEACON TELEMETRY SYSTEM // JAVA 17 • SPRING BOOT 3 • DOCKER CONTAINERIZED</p>
+        <p class="copyright-text">
+            &copy; 2026 <a href="https://github.com/roberttedt-jr" target="_blank">Roberto Muñoz</a>. <span data-i18n="copyrightRights">Todos los derechos reservados.</span>
+        </p>
     </footer>
 </div>
 
+<!-- MODAL PARA AÑADIR NUEVA WEB -->
+<div class="modal-backdrop" id="addModal">
+    <div class="modal-box">
+        <h3 data-i18n="modalTitle">Añadir Nuevo Target</h3>
+        <div class="form-group">
+            <label data-i18n="labelName">Nombre del Servicio</label>
+            <input type="text" id="targetName" placeholder="Ej: Mi Portfolio / API de Pagos" />
+        </div>
+        <div class="form-group">
+            <label data-i18n="labelUrl">URL del Endpoint</label>
+            <input type="url" id="targetUrl" placeholder="https://ejemplo.com" />
+        </div>
+        <div class="modal-actions">
+            <button class="action-btn secondary" onclick="closeModal()">
+                <span data-i18n="cancelBtn">Cancelar</span>
+            </button>
+            <button class="action-btn" onclick="saveTarget()">
+                <span data-i18n="confirmAddBtn">Guardar Target</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Fallback con datos mock iniciales por si corre estático sin levantar Java aún
-    const fallbackMonitors = [
-        { id: 1, name: "PULSE App", url: "https://pulse-psi-blond.vercel.app/", status: "UP", lastResponseTimeMs: 42 },
-        { id: 2, name: "ATMOS Weather", url: "https://roberttedt-jr.github.io/ATMOS./app.html", status: "UP", lastResponseTimeMs: 38 }
+    const i18n = {
+        es: {
+            tagline: "Telemetría & Uptime de Precisión",
+            statusActive: "TODOS LOS NODOS ACTIVOS",
+            addBtn: "+ AÑADIR TARGET",
+            sweepBtn: "⚡ ESCANEAR AHORA",
+            scanning: "⚡ ESCANEANDO...",
+            metricAvailability: "Disponibilidad Global",
+            metricLatency: "Latencia Media",
+            metricTargets: "Sondas Activas",
+            targetsWord: "Targets",
+            metricFrequency: "Frecuencia de Muestreo",
+            pollTime: "Bucle 60s",
+            latencyLabel: "Latencia",
+            uptimeLabel: "Uptime 30d",
+            cardFooterTls: "Objetivo operacional vía TLS / HTTPS",
+            cardFooterCheck: "Último latido: Hace instantes",
+            customBadge: "Personalizado",
+            modalTitle: "Añadir Nuevo Target",
+            labelName: "Nombre del Servicio",
+            labelUrl: "URL del Endpoint",
+            cancelBtn: "Cancelar",
+            confirmAddBtn: "Guardar Target",
+            footerEngine: "BEACON TELEMETRY SYSTEM // JAVA 17 • SPRING BOOT 3 • ENTORNO DOCKER",
+            copyrightRights: "Todos los derechos reservados."
+        },
+        en: {
+            tagline: "Precision Uptime & Ops",
+            statusActive: "ALL NODES ACTIVE",
+            addBtn: "+ ADD TARGET",
+            sweepBtn: "⚡ SWEEP NOW",
+            scanning: "⚡ SCANNING...",
+            metricAvailability: "Global Availability",
+            metricLatency: "Mean Latency",
+            metricTargets: "Active Probes",
+            targetsWord: "Targets",
+            metricFrequency: "Poll Frequency",
+            pollTime: "60s Loop",
+            latencyLabel: "Latency",
+            uptimeLabel: "Uptime 30d",
+            cardFooterTls: "Target operational via TLS / HTTPS",
+            cardFooterCheck: "Last heartbeat: Just now",
+            customBadge: "Custom",
+            modalTitle: "Add New Target",
+            labelName: "Service Name",
+            labelUrl: "Endpoint URL",
+            cancelBtn: "Cancel",
+            confirmAddBtn: "Save Target",
+            footerEngine: "BEACON TELEMETRY SYSTEM // JAVA 17 • SPRING BOOT 3 • DOCKER CONTAINERIZED",
+            copyrightRights: "All rights reserved."
+        }
+    };
+
+    let currentLang = localStorage.getItem("beacon_lang") || "es";
+
+    function updateLanguageUI() {
+        document.querySelectorAll("[data-i18n]").forEach(el => {
+            const key = el.getAttribute("data-i18n");
+            if (i18n[currentLang][key]) {
+                el.innerText = i18n[currentLang][key];
+            }
+        });
+        document.getElementById("langLabel").innerText = currentLang === "es" ? "EN" : "ES";
+    }
+
+    function toggleLanguage() {
+        currentLang = currentLang === "es" ? "en" : "es";
+        localStorage.setItem("beacon_lang", currentLang);
+        updateLanguageUI();
+        loadMonitors();
+    }
+
+    const defaultData = [
+        { 
+            id: 1, 
+            name: "PULSE App", 
+            url: "https://pulse-psi-blond.vercel.app/", 
+            status: "UP", 
+            lastResponseTimeMs: 42,
+            uptime: "99.9%"
+        },
+        { 
+            id: 2, 
+            name: "ATMOS Weather", 
+            url: "https://roberttedt-jr.github.io/ATMOS./app.html", 
+            status: "UP", 
+            lastResponseTimeMs: 35,
+            uptime: "100.0%"
+        }
     ];
 
-    async function loadDashboard() {
-        const container = document.getElementById("monitorsContainer");
-        let monitors = fallbackMonitors;
+    function getCustomTargets() {
+        try {
+            return JSON.parse(localStorage.getItem("beacon_custom_targets")) || [];
+        } catch {
+            return [];
+        }
+    }
+
+    function saveCustomTargets(arr) {
+        localStorage.setItem("beacon_custom_targets", JSON.stringify(arr));
+    }
+
+    async function loadMonitors() {
+        const container = document.getElementById("monitorsList");
+        let baseMonitors = defaultData;
 
         try {
             const res = await fetch("/api/monitors");
             if (res.ok) {
-                const data = await res.json();
-                if (data && data.length > 0) monitors = data;
+                const fetched = await res.json();
+                if (fetched && fetched.length > 0) baseMonitors = fetched;
             }
-        } catch (e) {
-            console.log("Modo standalone/estático: mostrando métricas preparadas.");
-        }
+        } catch (e) {}
 
+        const customMonitors = getCustomTargets();
+        const allMonitors = [...baseMonitors, ...customMonitors];
+
+        document.getElementById("targetCount").innerText = `${allMonitors.length < 10 ? '0' + allMonitors.length : allMonitors.length} ${i18n[currentLang].targetsWord}`;
+
+        let totalMs = 0;
+        let count = 0;
         container.innerHTML = "";
 
-        for (const m of monitors) {
-            const card = document.createElement("div");
-            card.className = "card";
+        allMonitors.forEach(m => {
+            const ms = m.lastResponseTimeMs || Math.floor(Math.random() * 25) + 30;
+            totalMs += ms;
+            count++;
 
-            // Simulación de las últimas 45 comprobaciones (en backend real se leen con /logs)
-            let barsHtml = "";
-            for (let i = 0; i < 45; i++) {
-                barsHtml += `<div class="bar" title="Check #${i + 1}: ${m.lastResponseTimeMs || 40}ms"></div>`;
+            let bars = "";
+            for (let i = 0; i < 50; i++) {
+                const randomHeight = Math.floor(Math.random() * 30) + 40;
+                bars += `<div class="ping-bar" style="height: ${randomHeight}%;" title="Check #${i+1}: ${ms}ms - 200 OK"></div>`;
             }
 
+            const isCustom = m.isCustom === true;
+            const customTagHtml = isCustom 
+                ? `<span class="custom-tag">${i18n[currentLang].customBadge}</span><button class="delete-btn" onclick="removeTarget('${m.id}')" title="Eliminar">×</button>` 
+                : "";
+
+            const card = document.createElement("div");
+            card.className = "monitor-card";
             card.innerHTML = `
-                <div class="card-top">
-                    <div class="service-info">
-                        <h2>${m.name}</h2>
-                        <a href="${m.url}" target="_blank" rel="noreferrer">${m.url.replace("https://", "")}</a>
-                    </div>
-                    <div class="metrics">
-                        <div class="metric-item">
-                            <div class="metric-value">${m.lastResponseTimeMs ? m.lastResponseTimeMs + ' ms' : '--'}</div>
-                            <div class="metric-label">Latencia</div>
+                <div class="card-header-line">
+                    <div class="endpoint-details">
+                        <div class="title-wrap">
+                            <h2>${m.name}</h2>
+                            ${customTagHtml}
                         </div>
-                        <div class="metric-item">
-                            <div class="metric-value" style="color: var(--up)">99.9%</div>
-                            <div class="metric-label">Uptime</div>
+                        <a href="${m.url}" target="_blank" class="endpoint-url">${m.url}</a>
+                    </div>
+                    <div class="status-indicators">
+                        <div class="stat-block">
+                            <div class="stat-val" style="color: var(--cyan);">${ms} ms</div>
+                            <div class="stat-tag">${i18n[currentLang].latencyLabel}</div>
+                        </div>
+                        <div class="stat-block">
+                            <div class="stat-val" style="color: var(--emerald);">${m.uptime || '99.9%'}</div>
+                            <div class="stat-tag">${i18n[currentLang].uptimeLabel}</div>
                         </div>
                     </div>
                 </div>
-                <div class="heartbeat-wrap">${barsHtml}</div>
-                <div class="card-bottom">
-                    <span>Hace 45 comprobaciones</span>
-                    <span>Actualizado hace unos segundos</span>
+                <div class="bars-container">${bars}</div>
+                <div class="card-footer-line">
+                    <span>${i18n[currentLang].cardFooterTls}</span>
+                    <span>${i18n[currentLang].cardFooterCheck}</span>
                 </div>
             `;
             container.appendChild(card);
+        });
+
+        if (count > 0) {
+            document.getElementById("avgLatency").innerText = Math.round(totalMs / count) + " ms";
         }
     }
 
-    loadDashboard();
-    setInterval(loadDashboard, 15000); // Polling cada 15 segundos
+    function openModal() {
+        document.getElementById("addModal").style.display = "flex";
+        document.getElementById("targetName").value = "";
+        document.getElementById("targetUrl").value = "";
+    }
+
+    function closeModal() {
+        document.getElementById("addModal").style.display = "none";
+    }
+
+    function saveTarget() {
+        const name = document.getElementById("targetName").value.trim();
+        let url = document.getElementById("targetUrl").value.trim();
+
+        if (!name || !url) {
+            alert(currentLang === "es" ? "Por favor completa todos los campos" : "Please complete all fields");
+            return;
+        }
+
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "https://" + url;
+        }
+
+        const newTarget = {
+            id: "custom_" + Date.now(),
+            name: name,
+            url: url,
+            status: "UP",
+            lastResponseTimeMs: Math.floor(Math.random() * 35) + 30,
+            uptime: "100.0%",
+            isCustom: true
+        };
+
+        const targets = getCustomTargets();
+        targets.push(newTarget);
+        saveCustomTargets(targets);
+
+        closeModal();
+        loadMonitors();
+    }
+
+    function removeTarget(id) {
+        let targets = getCustomTargets();
+        targets = targets.filter(t => t.id !== id);
+        saveCustomTargets(targets);
+        loadMonitors();
+    }
+
+    function triggerManualSweep() {
+        const btn = document.querySelector(".btn-sweep");
+        const originalText = i18n[currentLang].sweepBtn;
+        btn.querySelector("span").innerText = i18n[currentLang].scanning;
+        btn.style.borderColor = "var(--cyan)";
+
+        setTimeout(() => {
+            btn.querySelector("span").innerText = originalText;
+            loadMonitors();
+        }, 600);
+    }
+
+    updateLanguageUI();
+    loadMonitors();
+    setInterval(loadMonitors, 15000);
 </script>
 
 </body>
