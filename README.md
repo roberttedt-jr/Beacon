@@ -1,39 +1,44 @@
-# BEACON 📡 | High-Precision Uptime & Latency Engine
-
-[![Java 17](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
-[![Spring Boot 3](https://img.shields.io/badge/Spring_Boot-3.2-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
-
-**BEACON** es un motor de monitorización y observabilidad en tiempo real diseñado para rastrear la disponibilidad, latencia y rendimiento de microservicios y aplicaciones web. Desarrollado con **Java 17**, **Spring Boot 3** y persistencia relacional en **PostgreSQL**, incluye un planificador concurrente asíncrono para *health checks* y un dashboard interactivo de baja latencia con estética de producto minimalista.
-
----
-
-## 🏛️ Arquitectura del Sistema
-
-El motor opera bajo un ciclo desacoplado de sondeo y consulta:
-
-```mermaid
-flowchart TD
+BEACON 📡 | High-Precision Uptime & Latency EngineBEACON es un motor de observabilidad y monitorización en tiempo real desarrollado para rastrear la disponibilidad (uptime), latencia de respuesta y estado operativo de servicios web e infraestructura de red.Diseñado bajo una arquitectura desacoplada en Java 17 y Spring Boot 3, implementa un planificador de sondeo concurrente, persistencia relacional en PostgreSQL mediante Spring Data JPA y una interfaz visual integrada tipo Status Page con estética minimalista y visualización por barras de latidos (heartbeat bars).🎯 Retos y Solución TécnicaEl objetivo del proyecto es resolver la monitorización continua de servicios propios (como PULSE o ATMOS) sin recurrir a plataformas de terceros con limitaciones de telemetría:Planificación no bloqueante y concurrencia: Ejecución periódica mediante @Scheduled utilizando el cliente HTTP nativo de Java (java.net.http.HttpClient) con control estricto de timeouts para evitar fugas de memoria o bloqueo de hilos.Modelado y consistencia de datos: Estructura relacional normalizada para separar la entidad monitorizada de sus registros de auditoría y telemetría temporal.Observabilidad accesible: Exposición de endpoints REST documentados y una vista estática en modo oscuro servida directamente por el core de Spring Boot sin dependencias de frameworks frontend pesados.🏛️ Arquitectura del SistemaFragmento de códigoflowchart TD
     subgraph Engine [BEACON Core Engine]
         A[UptimeScheduler: @Scheduled 60s] -->|HTTP Ping Asíncrono| B(Servicios Objetivo: PULSE / ATMOS)
         B -->|Respuesta HTTP & Latencia ms| A
-        A -->|Persistencia Transaccional| C[(PostgreSQL: Monitors & PingLogs)]
+        A -->|Persistencia Transaccional| C[(PostgreSQL / H2: Monitors & PingLogs)]
     end
 
     subgraph API & UI [Observability Layer]
-        D[MonitorController: REST Endpoints] -->|Lectura JPA| C
-        E[Frontend Dashboard: Status Page] -->|Polling Reactivo| D
+        D[MonitorController: REST Endpoints] -->|Consultas JPA| C
+        E[Dashboard Web: static/index.html] -->|Polling Reactivo cada 15s| D
     end
-✨ Características Técnicas⏱️ Motor de Sondeo Concurrente: Health checks periódicos programados (@Scheduled) sobre java.net.http.HttpClient con resolución de milisegundos y gestión de timeouts.💾 Persistencia Relacional Optimizada: Modelado ORM con Hibernate / Spring Data JPA estructurado en dos entidades clave (Monitor y PingLog) con índices para consultas de series temporales.🌐 API RESTful Abierta: Endpoints desacoplados para consulta de telemetría y registro dinámico de nuevos servicios vigilados.📊 Status Page Integrada: Interfaz en modo oscuro con visualización de estado de servicio, latencia promedio y barras de latidos (heartbeat bars) en tiempo real.🐳 Contenedorización Multi-Stage: Dockerfile optimizado en dos etapas (build con Maven y ejecución sobre Alpine JRE) para reducir la superficie del contenedor y optimizar el consumo de RAM.🛠️ Stack TecnológicoComponenteTecnologíaJustificaciónLenguaje & FrameworkJava 17 / Spring Boot 3Tipado estricto, robustez empresarial y ecosistema maduro para servicios críticos.PersistenciaSpring Data JPA / PostgreSQLConsistencia ACID en registros históricos y mapeo declarativo de entidades.PlanificadorSpring Task Execution (@Scheduled)Ejecución periódica no bloqueante para muestreo continuo de infraestructura.DespliegueDocker & Docker ComposeAislamiento completo del entorno y compatibilidad directa con nubes modernas.🚀 Despliegue LocalCon Docker:Bash# Construir y arrancar el contenedor
-docker build -t beacon .
-docker run -p 8080:8080 beacon
-Accede al panel en: http://localhost:8080👨‍💻 AutorDesarrollado por Roberto MuñozGitHub: @roberttedt-jr
-4. Dale a **Commit changes...**.
+✨ Características Principales⏱️ Motor de Health Checks Automático: Sondeo continuo cada 60 segundos con medición de latencia en milisegundos y captura de códigos de estado HTTP (2xx, 4xx, 5xx).💾 Persistencia Transaccional: Registro histórico de pings mediante Spring Data JPA e Hibernate, permitiendo auditar la estabilidad temporal de cada endpoint.🌐 API RESTful Completa:GET /api/monitors: Listado de todos los servicios registrados con su último estado y tiempo de respuesta.GET /api/monitors/{id}/logs: Obtención de los últimos 50 registros para renderizar el historial de disponibilidad.POST /api/monitors: Registro dinámico de nuevas URLs a monitorizar.📊 Status Page Integrada: Dashboard responsivo en modo oscuro con indicadores de estado pulsantes (All Systems Operational), métricas de disponibilidad (Uptime %) y barras de estado por servicio.🐳 Contenedorización Multi-Stage: Dockerfile estructurado en dos etapas (compilación con Maven y ejecución sobre Alpine JRE) para minimizar el tamaño final de la imagen y optimizar el consumo de recursos.🛠️ Stack TecnológicoCapa / ComponenteTecnologíaRol TécnicoBackend CoreJava 17Lenguaje con tipado estricto, gestión de hilos y concurrencia moderna.FrameworkSpring Boot 3.2Inversión de control (IoC), inyección de dependencias y configuración declarativa.PersistenciaSpring Data JPA / HibernateAbstracción de acceso a datos y mapeo objeto-relacional (ORM).Base de DatosPostgreSQL / H2 DatabasePostgreSQL para producción y base de datos H2 en memoria para pruebas rápidas.Networkingjava.net.http.HttpClientPeticiones HTTP eficientes con soporte HTTP/2 y gestión de tiempos de espera.Frontend / DashboardHTML5 Semántico, CSS Grid/Flexbox, ES6+Interfaz visual ligera y reactiva sin sobrecarga de dependencias.DespliegueDockerEmpaquetado portátil y reproducible para entornos cloud.📂 Estructura del RepositorioPlaintextBEACON/
+├── Dockerfile                                 # Compilación y runtime optimizado en contenedor
+├── pom.xml                                    # Dependencias del proyecto (Spring Web, Data JPA, PostgreSQL)
+└── src/
+    └── main/
+        ├── java/com/beacon/
+        │   ├── BeaconApplication.java         # Clase principal con @EnableScheduling
+        │   ├── controller/
+        │   │   └── MonitorController.java     # Endpoints REST expuestos
+        │   ├── model/
+        │   │   ├── Monitor.java               # Entidad del servicio monitorizado
+        │   │   └── PingLog.java               # Entidad del registro histórico de pings
+        │   ├── repository/
+        │   │   ├── MonitorRepository.java     # Consultas Spring Data JPA para monitores
+        │   │   └── PingLogRepository.java     # Consultas Spring Data JPA para logs históricos
+        │   └── service/
+        │       └── UptimeScheduler.java       # Vigilante de red (Health check engine)
+        └── resources/
+            ├── application.properties         # Configuración de base de datos y puertos
+            └── static/
+                └── index.html                 # Status Page y Dashboard visual
+🚀 Despliegue y Ejecución LocalOpción 1: Con Docker (Recomendado)Bash# 1. Clonar el repositorio
+git clone https://github.com/roberttedt-jr/BEACON.git
+cd BEACON
 
----
+# 2. Construir la imagen Docker
+docker build -t beacon-app .
 
-Con esto, el repositorio de **BEACON** queda con el backend, el frontend y la documentación listos. Tu trilogía de proyectos queda perfectamente equilibrada:
-1. **PULSE:** Producto completo, analítica y diseño de interfaz móvil.
-2. **ATMOS:** Consumo ágil de APIs externas, canvas y filosofía PWA.
-3. **BEACON:** Ingeniería de backend con Java/Spring Boot, persistencia relacional y monit
+# 3. Levantar el contenedor en el puerto 8080
+docker run -d -p 8080:8080 --name beacon beacon-app
+Opción 2: Con Maven y Java 17Bash# Ejecutar directamente con el plugin de Spring Boot
+./mvnw spring-boot:run
+Una vez iniciado, accede al dashboard interactivo en tu navegador:http://localhost:8080🔮 Roadmap / Próximas Mejoras[ ] Integración de notificaciones automáticas mediante Webhooks hacia Telegram / Discord ante eventos de caída de servicio.[ ] Soporte para comprobaciones de sockets TCP e ICMP (Ping de red) directo a direcciones IP.[ ] Pipeline de integración continua (CI/CD) con GitHub Actions para validación de compilación y publicación de imagen en Docker Hub.👨‍💻 AutorRoberto MuñozGitHub: @roberttedt-jr
