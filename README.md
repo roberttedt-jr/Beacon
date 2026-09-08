@@ -1,134 +1,217 @@
-<h1>BEACON 📡 | High-Precision Uptime & Latency Engine</h1>
+# 📡 BEACON — High-Precision Uptime & Latency Engine
 
-<p>
-  <img src="https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 17" />
-  <img src="https://img.shields.io/badge/Spring_Boot-3.2-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" alt="Spring Boot 3" />
-  <img src="https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
-</p>
+<div align="center">
 
-<p>
-  <strong>BEACON</strong> es un motor de observabilidad y monitorización en tiempo real desarrollado para rastrear la disponibilidad (uptime), latencia de respuesta y estado operativo de servicios web e infraestructura de red.
-</p>
+### **Motor de Observabilidad, Latencia y Disponibilidad en Tiempo Real.**
 
-<p>
-  Diseñado bajo una arquitectura desacoplada en <strong>Java 17</strong> y <strong>Spring Boot 3</strong>, implementa un planificador de sondeo concurrente, persistencia relacional en <strong>PostgreSQL</strong> mediante <strong>Spring Data JPA</strong> y una interfaz visual integrada tipo Status Page con estética minimalista y visualización por barras de latidos (heartbeat bars).
-</p>
+[![Java 17](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
+[![Spring Boot 3](https://img.shields.io/badge/Spring_Boot-3.2.3-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Hibernate](https://img.shields.io/badge/Hibernate-ORM-59666C?style=for-the-badge&logo=hibernate&logoColor=white)](https://hibernate.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![License MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-<hr />
+[Características](#-características-principales) • [Arquitectura del Sistema](#-arquitectura-del-sistema) • [API RESTful](#-referencia-de-la-api-rest) • [Ejecución Local & Docker](#-ejecución-y-despliegue) • [Estructura](#-estructura-del-proyecto)
 
-<h2>🎯 Retos y Solución Técnica</h2>
+</div>
 
-<p>El objetivo del proyecto es resolver la monitorización continua de servicios propios sin recurrir a plataformas de terceros con limitaciones de telemetría:</p>
+---
 
-<ul>
-  <li><strong>Planificación no bloqueante y concurrencia:</strong> Ejecución periódica mediante <code>@Scheduled</code> utilizando el cliente HTTP nativo de Java (<code>java.net.http.HttpClient</code>) con control estricto de timeouts para evitar bloqueos de hilos.</li>
-  <li><strong>Modelado y consistencia de datos:</strong> Estructura relacional normalizada para separar la entidad monitorizada de sus registros de auditoría y telemetría temporal.</li>
-  <li><strong>Observabilidad accesible:</strong> Exposición de endpoints REST documentados y una vista estática en modo oscuro servida directamente por el core de Spring Boot.</li>
-</ul>
+## 📖 Descripción del Proyecto
 
-<hr />
+**BEACON** es un motor de telemetría y observabilidad en tiempo real desarrollado para rastrear de forma autónoma la **disponibilidad (*uptime*)**, **latencia de red** y el **estado operativo** de servicios web, APIs y microservicios.
 
-<h2>🏛️ Flujo del Sistema</h2>
+Construido sobre **Java 17** y **Spring Boot 3.2**, implementa un planificador de sondeo concurrente no bloqueante mediante el cliente nativo `java.net.http.HttpClient` (HTTP/2), persistencia transaccional en **PostgreSQL** mediante **Spring Data JPA**, y sirve una interfaz visual moderna (*Status Page*) en modo oscuro con indicadores de latidos en vivo (*heartbeat bars*).
 
-<pre>
-[UptimeScheduler: Tarea periódica cada 60s]
-          │
-          ├──> Envía HTTP Ping asíncrono a servicios (PULSE / ATMOS)
-          │
-          ├──> Registra código HTTP y latencia en milisegundos
-          │
-          └──> Guarda registro en base de datos (PostgreSQL / H2)
-                    │
-                    ▼
-          [MonitorController: API REST]
-                    │
-                    ▼
-          [Dashboard Web: Interfaz Status Page]
-</pre>
+---
 
-<hr />
+## ✨ Características Principales
 
-<h2>✨ Características Principales</h2>
+- **Sondeo Periódico Automático:** Ejecución programada periódica (`@Scheduled`) con temporizadores configurables y gestión rigurosa de timeouts para evitar el bloqueo de hilos de trabajo.
+- **Medición Precisa de Latencia:** Registro en milisegundos del tiempo de ida y vuelta (*round-trip time*) y almacenamiento de códigos HTTP de respuesta (`2xx`, `4xx`, `5xx`).
+- **Persistencia Transaccional con Spring Data JPA:** Histórico normalizado en PostgreSQL con soporte para base de datos H2 en memoria durante desarrollo y tests automatizados.
+- **Status Page Integrada:** Dashboard visual servido directamente por el backend con estética *dark mode*, métricas acumuladas de uptime y barras pulsantes de estado (*All Systems Operational*).
+- **API REST Completa:** Endpoints para consultar estados consolidados, historiales de logs y registrar nuevos endpoints de monitorización dinámicamente.
+- **Contenedorización Multi-Stage:** `Dockerfile` optimizado en dos fases (build con Maven + runtime con Eclipse Temurin JRE) para una imagen final ligera y segura.
 
-<ul>
-  <li><strong>Motor de Health Checks Automático:</strong> Sondeo continuo cada 60 segundos con medición de latencia en milisegundos y captura de códigos de estado HTTP (2xx, 4xx, 5xx).</li>
-  <li><strong>Persistencia Transaccional:</strong> Registro histórico de pings mediante Spring Data JPA e Hibernate para auditar la estabilidad temporal.</li>
-  <li><strong>API RESTful Completa:</strong>
-    <ul>
-      <li><code>GET /api/monitors</code>: Listado de servicios con su estado actual y latencia.</li>
-      <li><code>GET /api/monitors/{id}/logs</code>: Historial de los últimos registros.</li>
-      <li><code>POST /api/monitors</code>: Registro dinámico de nuevas URLs.</li>
-    </ul>
-  </li>
-  <li><strong>Status Page Integrada:</strong> Dashboard responsivo en modo oscuro con indicadores de estado pulsantes (<em>All Systems Operational</em>), métricas de uptime y barras de estado.</li>
-  <li><strong>Contenedorización Multi-Stage:</strong> <code>Dockerfile</code> en dos etapas para minimizar el tamaño final de la imagen.</li>
-</ul>
+---
 
-<hr />
+## 🏛️ Arquitectura del Sistema
 
-<h2>🛠️ Stack Tecnológico</h2>
+```
+┌────────────────────────────────────────────────────────┐
+│               UptimeScheduler (Cron 60s)               │
+│      • Sondeo concurrente asíncrono no bloqueante      │
+│      • java.net.http.HttpClient (HTTP/2 nativo)        │
+└──────────────────────────┬─────────────────────────────┘
+                           │
+            Pings HTTP / HTTPS periódicos
+                           │
+                           ▼
+              [ Servicios Monitorizados ]
+             (Pulse, Atmos, APIs externas)
+                           │
+                           │  Código HTTP + Latencia (ms)
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│                  Capa de Persistencia                  │
+│            Spring Data JPA / Hibernate Core            │
+│            • PostgreSQL (Producción / Render)          │
+│            • H2 In-Memory (Desarrollo / Tests)         │
+└──────────────────────────┬─────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│            MonitorController (REST API)                │
+│     GET /api/monitors  •  GET /api/monitors/{id}/logs  │
+│                   POST /api/monitors                   │
+└──────────────────────────┬─────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│             Dashboard Web (Status Page)                │
+│    Interfaz HTML5 / CSS Grid / JS ES6+ integrada       │
+└────────────────────────────────────────────────────────┘
+```
 
-<ul>
-  <li><strong>Backend Core:</strong> Java 17</li>
-  <li><strong>Framework:</strong> Spring Boot 3.2 (Spring Web, Spring Data JPA, Task Scheduling)</li>
-  <li><strong>Persistencia:</strong> Spring Data JPA / Hibernate</li>
-  <li><strong>Base de Datos:</strong> PostgreSQL / H2 Database</li>
-  <li><strong>Networking:</strong> <code>java.net.http.HttpClient</code> (HTTP/2 nativo)</li>
-  <li><strong>Frontend:</strong> HTML5, CSS Grid/Flexbox, JavaScript ES6+</li>
-  <li><strong>Contenedores:</strong> Docker</li>
-</ul>
+---
 
-<hr />
+## 🛠️ Stack Tecnológico
 
-<h2>📂 Estructura del Repositorio</h2>
+| Capa | Tecnología | Función |
+|---|---|---|
+| **Lenguaje Core** | [Java 17 (LTS)](https://www.oracle.com/java/) | Lenguaje tipado con soporte moderno para registros y concurrencia |
+| **Framework** | [Spring Boot 3.2.3](https://spring.io/projects/spring-boot) | Framework base (Spring Web, Spring Data JPA, Task Scheduling) |
+| **Persistencia** | [Hibernate](https://hibernate.org/) / JPA | ORM transaccional para mapeo objeto-relacional |
+| **Bases de Datos** | [PostgreSQL 15](https://www.postgresql.org/) + [H2 Database](https://www.h2database.com/) | Base de datos de producción y base de datos en memoria para pruebas |
+| **Networking** | `java.net.http.HttpClient` | Cliente HTTP/2 asíncrono nativo de Java 11+ |
+| **Frontend** | HTML5, CSS Grid/Flexbox, JavaScript ES6+ | Status Page reactiva servida como activo estático |
+| **Contenedores** | [Docker](https://www.docker.com/) | Contenedorización multi-stage para despliegue en la nube |
 
-<pre>
+---
+
+## 📡 Referencia de la API REST
+
+### 1. Listar Monitores y Estado Actual
+```http
+GET /api/monitors
+```
+**Respuesta:**
+```json
+[
+  {
+    "id": 1,
+    "name": "Pulse Web App",
+    "url": "https://pulse-app.vercel.app",
+    "status": "UP",
+    "lastLatency": 142,
+    "uptimePercentage": 99.98,
+    "lastCheck": "2026-09-08T19:30:00Z"
+  }
+]
+```
+
+### 2. Obtener Historial de Pings de un Monitor
+```http
+GET /api/monitors/{id}/logs
+```
+**Respuesta:**
+```json
+[
+  {
+    "id": 105,
+    "statusCode": 200,
+    "latencyMs": 142,
+    "timestamp": "2026-09-08T19:30:00Z"
+  }
+]
+```
+
+### 3. Registrar un Nuevo Servicio a Monitorizar
+```http
+POST /api/monitors
+Content-Type: application/json
+
+{
+  "name": "Atmos Experience",
+  "url": "https://atmos-web.vercel.app"
+}
+```
+
+---
+
+## 📂 Estructura del Proyecto
+
+```text
 BEACON/
-├── Dockerfile
-├── pom.xml
+├── Dockerfile                        # Imagen multi-stage (Maven build + Eclipse Temurin JRE)
+├── pom.xml                           # Descriptor Maven con dependencias Spring Boot 3.2
 └── src/
-    └── main/
-        ├── java/com/beacon/
-        │   ├── BeaconApplication.java
-        │   ├── controller/
-        │   │   └── MonitorController.java
-        │   ├── model/
-        │   │   ├── Monitor.java
-        │   │   └── PingLog.java
-        │   ├── repository/
-        │   │   ├── MonitorRepository.java
-        │   │   └── PingLogRepository.java
-        │   └── service/
-        │       └── UptimeScheduler.java
-        └── resources/
-            ├── application.properties
-            └── static/
-                └── index.html
-</pre>
+    ├── main/
+    │   ├── java/com/beacon/
+    │   │   ├── BeaconApplication.java        # Punto de entrada de la aplicación Spring Boot
+    │   │   ├── controller/
+    │   │   │   └── MonitorController.java    # Controlador REST (/api/monitors)
+    │   │   ├── model/
+    │   │   │   ├── Monitor.java              # Entidad JPA para servicios monitorizados
+    │   │   │   └── PingLog.java              # Entidad JPA para registros de auditoría y latencia
+    │   │   ├── repository/
+    │   │   │   ├── MonitorRepository.java    # Interfaz Spring Data JPA para Monitores
+    │   │   │   └── PingLogRepository.java    # Interfaz Spring Data JPA para logs de telemetría
+    │   │   └── service/
+    │   │       └── UptimeScheduler.java      # Motor concurrente de sondeo con @Scheduled
+    │   └── resources/
+    │       ├── application.properties        # Configuración de base de datos y puertos
+    │       └── static/
+    │           └── index.html                # Status Page integrada en modo oscuro
+    └── test/                                 # Pruebas unitarias y de integración
+```
 
-<hr />
+---
 
-<h2>🚀 Despliegue y Ejecución Local</h2>
+## 🚀 Ejecución y Despliegue
 
-<h3>Opción 1: Con Docker</h3>
-<pre>
+### Opción 1: Ejecución con Docker (Recomendada)
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/roberttedt-jr/beacon.git
+cd beacon
+
+# 2. Construir la imagen Docker multi-etapa
 docker build -t beacon-app .
+
+# 3. Ejecutar el contenedor
 docker run -d -p 8080:8080 --name beacon beacon-app
-</pre>
+```
 
-<h3>Opción 2: Con Maven y Java 17</h3>
-<pre>
-./mvnw spring-boot:run
-</pre>
+Accede al dashboard en [http://localhost:8080](http://localhost:8080).
 
-<p>Accede al panel interactivo en: <code>http://localhost:8080</code></p>
+---
 
-<hr />
+### Opción 2: Ejecución Local con Maven y Java 17
 
-<h2>👨‍💻 Autor</h2>
+#### Prerrequisitos:
+- JDK 17 o superior instalado.
+- Maven 3.8+ (o el wrapper de Maven).
 
-<p>
-  Desarrollado por <strong>Roberto Muñoz</strong><br />
-  GitHub: <a href="https://github.com/roberttedt-jr">@roberttedt-jr</a>
-</p>
+```bash
+# Compilar y ejecutar
+mvn spring-boot:run
+```
+
+Para ejecutar contra PostgreSQL en lugar de H2, define las variables de entorno correspondientes:
+```bash
+export SPRING_DATASOURCE_URL="jdbc:postgresql://localhost:5432/beacon_db"
+export SPRING_DATASOURCE_USERNAME="postgres"
+export SPRING_DATASOURCE_PASSWORD="password_segura"
+mvn spring-boot:run
+```
+
+---
+
+## 👨‍💻 Autor y Licencia
+
+Desarrollado y mantenido por **Roberto Tedt** ([@roberttedt-jr](https://github.com/roberttedt-jr)).
+
+Distribuido bajo la licencia [MIT](LICENSE).
