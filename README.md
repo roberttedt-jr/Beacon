@@ -212,6 +212,6 @@ mvn spring-boot:run
 
 ## 👨‍💻 Autor y Licencia
 
-Desarrollado y mantenido por **Roberto Tedt** ([@roberttedt-jr](https://github.com/roberttedt-jr)).
+Desarrollado y mantenido por **Roberto** ([@roberttedt-jr](https://github.com/roberttedt-jr)).
 
 Distribuido bajo la licencia [MIT](LICENSE).
